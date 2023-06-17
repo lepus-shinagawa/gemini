@@ -18,7 +18,7 @@ function StarSigns() {
                 AI星座占い
             </Typography>
             <Typography variant="h2">
-                {date.getMonth() + 1}/{date.getDate() + 1}({dayOfWeekName})の運勢
+                {date.getMonth() + 1}/{date.getDate()}({dayOfWeekName})の運勢
             </Typography>
             <Grid container spacing={{ xs: 3, md: 4 }} columns={{ xs: 4, sm: 8, md: 12 }}>
                 {startSignNames.map((starSignName, index) => (
@@ -27,11 +27,14 @@ function StarSigns() {
                             <CardContent>
                                 <Typography variant="h5" component="div">
                                     <Link
-                                        to="/result"
-                                        state={{
-                                            date: date,
-                                            dayOfWeekName: dayOfWeekName,
-                                            starSignName: starSignName,
+                                        to={{
+                                            pathname: "/result",
+                                            search: "?" + new URLSearchParams({
+                                                date: date.toString(),
+                                                starSignIndex: index,
+                                                starSignName: starSignName,
+                                                dayOfWeekName: dayOfWeekName,
+                                            }),
                                         }}
                                     >
                                         {starSignName}
