@@ -1,0 +1,60 @@
+[
+  {
+    "inputs": [],
+    "name": "mintNFT",
+    "outputs": [
+      {
+        "internalType": "int256",
+        "name": "",
+        "type": "int256"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "int256",
+        "name": "index",
+        "type": "int256"
+      }
+    ],
+    "name": "getResult",
+    "outputs": [
+      {
+        "internalType": "string[3]",
+        "name": "",
+        "type": "string[3]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getResults",
+    "outputs": [
+      {
+        "internalType": "string[3][12]",
+        "name": "ret",
+        "type": "string[3][12]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "x",
+    "outputs": [
+      {
+        "internalType": "string[2]",
+        "name": "",
+        "type": "string[2]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  }
+]
