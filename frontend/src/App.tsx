@@ -1,4 +1,4 @@
-import StarSigns from "./pages/StarSigns.tsx";
+import StarSignsPage from "./pages/StarSignsPage.tsx";
 import Result from './pages/Result.tsx';
 import {
     createBrowserRouter,
@@ -12,7 +12,7 @@ function App() {
                 createBrowserRouter([
                     {
                         path: "/",
-                        element: <StarSigns />,
+                        element: <StarSignsPage />,
                     },
                     {
                         path: "/result",

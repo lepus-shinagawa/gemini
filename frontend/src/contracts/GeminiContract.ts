@@ -3,10 +3,10 @@ import GeminiABI from "../contracts/gemini.json";
 import { AbiItem } from 'web3-utils'
 import Web3 from "web3";
 import { HttpProvider } from "web3-core";
+import {DateFormatter} from "../DateFormatter.ts";
 
 export class GeminiContract {
     constructor() {
-
     }
 
     private async getProvider(): Promise<HttpProvider>{
@@ -25,24 +25,23 @@ export class GeminiContract {
         const web3 = new Web3(provider as HttpProvider);
         return new web3.eth.Contract(
             GeminiABI as AbiItem[],
-            "0xF6B862987DdB7e4125013E81663642C72F917bF8");
+            "0x7aEE0e2c6B62612357864fABa052843D939b975f");
     }
 
-    public async getResult(index: number) {
+    public async getTokenURI(tokenId: number){
         const contract = await this.getContract();
-        const result = await contract
-            .methods["getResults"]().call();
-        return result[index];
+        return await contract
+            .methods["tokenURI"](tokenId).call();
     }
 
-    public async mint(_: number) {
+    public async safeMint(date: Date, _: number): Promise<number> {
         const accounts = await window.ethereum
             .request({method: 'eth_requestAccounts'})
             .catch((err: any) => {
                 if (err.code === 4001) {
                     // EIP-1193 userRejectedRequest error
                     // If this happens, the user rejected the connection request.
-                    throw new Error("Please connect to MetaMask.")
+                    throw new Error("MetaMaskと接続してください")
                 } else {
                     throw new err;
                 }
@@ -53,12 +52,19 @@ export class GeminiContract {
             .request({ method: 'eth_chainId' });
         if (chainId !== "0x250")
         {
-            throw new Error("Please connect Astar network.")
+            throw new Error("Astar networkに切り替えてください")
         }
 
         const contract = await this.getContract();
-        await contract.methods["mintNFT"]().send({
-            from: account
+        await contract.methods["safeMint"](
+            account,
+            DateFormatter.exec(date, "yyyyMMdd"),
+            0,
+            // starSignIndex,
+        ).send({
+            from: account,
         });
+
+        return 0;
     }
 }
