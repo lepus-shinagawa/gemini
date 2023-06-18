@@ -31,7 +31,7 @@ function StarSigns() {
                                             pathname: "/result",
                                             search: "?" + new URLSearchParams({
                                                 date: date.toString(),
-                                                starSignIndex: index,
+                                                starSignIndex: String(index),
                                                 starSignName: starSignName,
                                                 dayOfWeekName: dayOfWeekName,
                                             }),

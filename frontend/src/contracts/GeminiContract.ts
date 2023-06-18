@@ -1,15 +1,16 @@
 import detectEthereumProvider from '@metamask/detect-provider';
 import GeminiABI from "../contracts/gemini.json";
+import { AbiItem } from 'web3-utils'
 import Web3 from "web3";
-import {HttpProvider} from "web3-core";
+import { HttpProvider } from "web3-core";
 
 export class GeminiContract {
     constructor() {
 
     }
 
-    private async getProvider(){
-        const provider = await detectEthereumProvider();
+    private async getProvider(): Promise<HttpProvider>{
+        const provider = await detectEthereumProvider<HttpProvider>();
         if (!provider) {
             throw new Error("Please install MetaMask!");
         }
@@ -23,21 +24,21 @@ export class GeminiContract {
         const provider = await this.getProvider();
         const web3 = new Web3(provider as HttpProvider);
         return new web3.eth.Contract(
-            GeminiABI,
+            GeminiABI as AbiItem[],
             "0xF6B862987DdB7e4125013E81663642C72F917bF8");
     }
 
-    public async getResult(index) {
+    public async getResult(index: number) {
         const contract = await this.getContract();
         const result = await contract
             .methods["getResults"]().call();
         return result[index];
     }
 
-    public async mint(index) {
+    public async mint(_: number) {
         const accounts = await window.ethereum
             .request({method: 'eth_requestAccounts'})
-            .catch((err) => {
+            .catch((err: any) => {
                 if (err.code === 4001) {
                     // EIP-1193 userRejectedRequest error
                     // If this happens, the user rejected the connection request.
