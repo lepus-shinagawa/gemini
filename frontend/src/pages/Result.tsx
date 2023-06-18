@@ -10,9 +10,10 @@ function Result() {
     const search = location.search;
     const query = new URLSearchParams(search);
 
-    const date = new Date(query.get("date"));
+    const date = new Date(query.get("date") as string);
     const starSignName = query.get("starSignName");
-    const starSignIndex = parseInt(query.get("starSignIndex"), 10);
+    const starSignIndex =
+        parseInt(query.get("starSignIndex") as string, 10);
     const dayOfWeekName = query.get("dayOfWeekName");
 
     useEffect(() => {
