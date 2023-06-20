@@ -4,6 +4,8 @@ import {
     createBrowserRouter,
     RouterProvider,
 } from "react-router-dom";
+import './App.css'
+import AdminPage from "./pages/AdminPage.tsx";
 
 function App() {
     return (
@@ -17,6 +19,10 @@ function App() {
                     {
                         path: "/result",
                         element: <Result />,
+                    },
+                    {
+                        path: "/admin",
+                        element: <AdminPage />,
                     },
                 ])
             }
