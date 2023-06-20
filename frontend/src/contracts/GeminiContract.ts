@@ -34,7 +34,7 @@ export class GeminiContract {
             .methods["tokenURI"](tokenId).call();
     }
 
-    public async safeMint(date: Date, _: number): Promise<number> {
+    public async safeMint(date: Date, starSignIndex: number): Promise<number> {
         const accounts = await window.ethereum
             .request({method: 'eth_requestAccounts'})
             .catch((err: any) => {
@@ -56,15 +56,13 @@ export class GeminiContract {
         }
 
         const contract = await this.getContract();
-        await contract.methods["safeMint"](
+        const ret = await contract.methods["safeMint"](
             account,
             DateFormatter.exec(date, "yyyyMMdd"),
-            0,
-            // starSignIndex,
+            starSignIndex,
         ).send({
             from: account,
         });
-
-        return 0;
+        return ret;
     }
 }

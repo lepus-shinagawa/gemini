@@ -17,14 +17,15 @@ const style = {
     left: '50%',
     transform: 'translate(-50%, -50%)',
     width: 400,
-    backgroundColor: 'gray',
-    border: '2px solid #000',
+    backgroundColor: 'white',
+    border: '2px solid white',
     boxShadow: 24,
     p: 4,
 };
 
 function Result() {
     const [result, setResult] = useState({description: "", image: ""});
+    const [txURI, setTxURI] = useState("");
     const [open, setOpen] = useState(false);
     const [errorMessage, setErrorMessage] = useState("");
     const [openNFT, setOpenNFT] = useState(false);
@@ -42,7 +43,7 @@ function Result() {
 
     useEffect(() => {
         const fetchData = async () => {
-            const r = await starSign.getMedaData(date);
+            const r = await starSign.getMetaData(date);
             setResult({
                 description: r["description"],
                 image: r["image"],
@@ -57,7 +58,8 @@ function Result() {
             setOpen(true);
             try{
                 const geminiContract = new GeminiContract();
-                await geminiContract.safeMint(date, starSignIndex);
+                const ret = await geminiContract.safeMint(date, starSignIndex);
+                setTxURI("https://blockscout.com/astar/tx/" + ret["transactionHash"])
                 setOpenNFT(true);
             } catch (e: any) {
                 setErrorMessage(e.message);
@@ -68,18 +70,28 @@ function Result() {
 
     return (
         <>
-            <Typography variant="h2">
+            <Typography variant="h3">
                 AI星座占い
             </Typography>
-            <Typography variant="h2">
+            <hr style={{height: "1px", backgroundColor: "black"}} />
+            <div style={{margin : "50px"}}></div>
+            <Typography variant="h3">
                 {date.getMonth() + 1}/{date.getDate()}({dayOfWeekName})の{starSignName}の運勢
             </Typography>
+            <div style={{margin : "30px"}}></div>
             <div>{result["description"]}</div>
+            <div style={{margin : "30px"}}></div>
+            <Typography variant="h4">
+                {starSignName}の今日のラッキーアイテムNFT
+            </Typography>
+            <Typography style={{margin: "10px"}}>
+                今日の運気を上げるためのNFTを発行します
+            </Typography>
             <Button
                 variant="outlined"
                 onClick={onClick}
             >
-                ミントする
+                発行する
             </Button>
             <Typography variant="h5" color="#ff0000">
                 {errorMessage}
@@ -90,18 +102,18 @@ function Result() {
                 open={open}
                 closeAfterTransition
                 slots={{ backdrop: Backdrop }}
-                slotProps={{
-                    backdrop: {
-                        timeout: 500,
-                    },
-                }}
             >
                 <Fade in={open}>
                     <Box sx={style}>
                         <Typography id="transition-modal-title" variant="h6" component="h2">
-                            ミントします。MetaMaskの操作を完了してください。
+                            NFTを発行中です。
+                            MetaMaskの操作を完了してください。
                         </Typography>
-                        <Typography id="transition-modal-description" sx={{ mt: 2 }}>
+                        <Typography
+                            id="transition-modal-description"
+                            sx={{ mt: 2 }}
+                            style={{textAlign: "center"}}
+                        >
                             <CircularProgress disableShrink />
                         </Typography>
                     </Box>
@@ -122,11 +134,18 @@ function Result() {
                 }}
             >
                 <Fade in={openNFT}>
-                    <Box sx={style}>
+                    <Box sx={style} style={{textAlign: "center"}}>
                         <Typography id="transition-modal-title" variant="h6" component="h2">
-                            ミント完了
+                            ラッキーアイテムNFTがミントされました
                         </Typography>
                         <NFTCard uri={result["image"]}></NFTCard>
+                        <div></div>
+                        <a
+                            href={txURI}
+                            target={"_blank"}
+                        >
+                            トランザクションを確認する
+                        </a>
                     </Box>
                 </Fade>
             </Modal>

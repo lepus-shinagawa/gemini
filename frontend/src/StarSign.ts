@@ -37,7 +37,7 @@ export class StarSign {
         return startSignNamesJp[this.index];
     }
 
-    public async getMedaData(date: Date){
+    public async getMetaData(date: Date){
         const baseURI = "https://astar.s3.ap-northeast-1.amazonaws.com/";
         const dateStr = DateFormatter.exec(date, "yyyy-MM-dd")
         const uri = `${baseURI}${this.toString()}_${dateStr}_metadata.json`
