@@ -34,7 +34,7 @@ export class GeminiContract {
             .methods["tokenURI"](tokenId).call();
     }
 
-    public async safeMint(date: Date, starSignIndex: number): Promise<number> {
+    public async safeMint(date: Date, starSignIndex: number): Promise<any> {
         const accounts = await window.ethereum
             .request({method: 'eth_requestAccounts'})
             .catch((err: any) => {
