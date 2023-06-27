@@ -14,7 +14,12 @@ contract Gemini is ERC721, ERC721URIStorage, Ownable {
     Counters.Counter private _tokenIdCounter;
     mapping(string => string[]) private _tokenURIsMap;
 
+    uint256 public constant MINT_PRICE = 100000000000000000; // 0.1 Astar
+
+    address payable public deployer;
+
     constructor() ERC721("Gemini", "GMN") {
+        deployer = payable(msg.sender);
     }
 
     function setTokenURIs(string memory yearMonthDate, string[] memory tokenURIs) external onlyOwner {
@@ -25,11 +30,15 @@ contract Gemini is ERC721, ERC721URIStorage, Ownable {
         return "";
     }
 
-    function safeMint(address to, string memory yearMonthDate, uint starSignIndex) external {
+    function safeMint(address to, string memory yearMonthDate, uint starSignIndex) external payable {
+
+        require(msg.value == MINT_PRICE, "Payment must be exactly equal to the mint price");
+        
         uint256 tokenId = _tokenIdCounter.current();
         _tokenIdCounter.increment();
         _safeMint(to, tokenId);
         _setTokenURI(tokenId, _tokenURIsMap[yearMonthDate][starSignIndex]);
+
     }
 
     function _burn(uint256 tokenId) internal override(ERC721, ERC721URIStorage) {
