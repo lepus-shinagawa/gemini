@@ -43,9 +43,10 @@ def decimal_to_int(obj):
         return int(obj)
 
 def generate_image(prompt):
+    anime_girl_prompt = f"An anime-style girl with expressive eyes and a cute outfit is showing the following advice in a cheerful manner: {prompt}"
     response = openai.Image.create(
         model="image-alpha-001",
-        prompt=prompt,
+        prompt=anime_girl_prompt,
         n=1,
         size="256x256",
         response_format="url"
@@ -88,7 +89,7 @@ def lambda_handler(event, context):
         img_data = BytesIO(response_img.content)
 
         # 今日の日付を取得してファイル名を作成
-        today = datetime.today().strftime('%Y-%m-%d')
+        today = (datetime.today()).strftime('%Y-%m-%d')
         star_sign_en = star_signs_dict[star_sign_jp]
         filename = f"{star_sign_en}_{today}.png"
 
@@ -109,7 +110,7 @@ def lambda_handler(event, context):
 
         metadata_filename = f"{star_sign_en}_{today}_metadata.json"
         upload_metadata_to_s3(metadata, metadata_filename)
-        time.sleep(20)
+        time.sleep(10)
 
     return {
         'statusCode': 200,

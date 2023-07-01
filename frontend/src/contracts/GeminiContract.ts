@@ -25,7 +25,7 @@ export class GeminiContract {
         const web3 = new Web3(provider as HttpProvider);
         return new web3.eth.Contract(
             GeminiABI as AbiItem[],
-            "0xE97d5266d29a442E4eA35c5CBb17afc665533BfE");
+            "0x9A024fE63240A665199339b4F540c6cDc7ed7759");
     }
 
     public async getTokenURI(tokenId: number){

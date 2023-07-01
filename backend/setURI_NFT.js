@@ -1,15 +1,10 @@
+const dotenv = require('dotenv');
 const Web3 = require('web3');
 
-exports.handler = async (event) => {
-    const contractAddress = process.env.CONTRACT_ADDRESS;
-    const privateKey = process.env.PRIVATE_KEY;
-    const providerUrl = process.env.ASTAR_RPC_URL;
+dotenv.config();
 
-    const yearMonthDate = event.yearMonthDate;
-    const tokenURIs = event.tokenURIs;
-
-    const web3 = new Web3(providerUrl);
-	const abi = [
+const CONTRACT_ADDRESS = '0x9b3C966db9D8726b397e06D870F8dD3a512A1dc4';
+const CONTRACT_ABI = [
 		{
 			"inputs": [],
 			"stateMutability": "nonpayable",
@@ -21,32 +16,7 @@ exports.handler = async (event) => {
 				{
 					"indexed": true,
 					"internalType": "address",
-					"name": "owner",
-					"type": "address"
-				},
-				{
-					"indexed": true,
-					"internalType": "address",
-					"name": "approved",
-					"type": "address"
-				},
-				{
-					"indexed": true,
-					"internalType": "uint256",
-					"name": "tokenId",
-					"type": "uint256"
-				}
-			],
-			"name": "Approval",
-			"type": "event"
-		},
-		{
-			"anonymous": false,
-			"inputs": [
-				{
-					"indexed": true,
-					"internalType": "address",
-					"name": "owner",
+					"name": "account",
 					"type": "address"
 				},
 				{
@@ -69,7 +39,7 @@ exports.handler = async (event) => {
 			"inputs": [
 				{
 					"internalType": "address",
-					"name": "to",
+					"name": "account",
 					"type": "address"
 				},
 				{
@@ -78,61 +48,10 @@ exports.handler = async (event) => {
 					"type": "uint256"
 				}
 			],
-			"name": "approve",
+			"name": "mint",
 			"outputs": [],
 			"stateMutability": "nonpayable",
 			"type": "function"
-		},
-		{
-			"anonymous": false,
-			"inputs": [
-				{
-					"indexed": false,
-					"internalType": "uint256",
-					"name": "_fromTokenId",
-					"type": "uint256"
-				},
-				{
-					"indexed": false,
-					"internalType": "uint256",
-					"name": "_toTokenId",
-					"type": "uint256"
-				}
-			],
-			"name": "BatchMetadataUpdate",
-			"type": "event"
-		},
-		{
-			"anonymous": false,
-			"inputs": [
-				{
-					"indexed": false,
-					"internalType": "uint256",
-					"name": "_tokenId",
-					"type": "uint256"
-				}
-			],
-			"name": "MetadataUpdate",
-			"type": "event"
-		},
-		{
-			"anonymous": false,
-			"inputs": [
-				{
-					"indexed": false,
-					"internalType": "address",
-					"name": "to",
-					"type": "address"
-				},
-				{
-					"indexed": false,
-					"internalType": "uint256",
-					"name": "tokenId",
-					"type": "uint256"
-				}
-			],
-			"name": "Minted",
-			"type": "event"
 		},
 		{
 			"anonymous": false,
@@ -164,29 +83,6 @@ exports.handler = async (event) => {
 			"inputs": [
 				{
 					"internalType": "address",
-					"name": "to",
-					"type": "address"
-				},
-				{
-					"internalType": "string",
-					"name": "yearMonthDate",
-					"type": "string"
-				},
-				{
-					"internalType": "uint256",
-					"name": "starSignIndex",
-					"type": "uint256"
-				}
-			],
-			"name": "safeMint",
-			"outputs": [],
-			"stateMutability": "payable",
-			"type": "function"
-		},
-		{
-			"inputs": [
-				{
-					"internalType": "address",
 					"name": "from",
 					"type": "address"
 				},
@@ -196,12 +92,22 @@ exports.handler = async (event) => {
 					"type": "address"
 				},
 				{
-					"internalType": "uint256",
-					"name": "tokenId",
-					"type": "uint256"
+					"internalType": "uint256[]",
+					"name": "ids",
+					"type": "uint256[]"
+				},
+				{
+					"internalType": "uint256[]",
+					"name": "amounts",
+					"type": "uint256[]"
+				},
+				{
+					"internalType": "bytes",
+					"name": "data",
+					"type": "bytes"
 				}
 			],
-			"name": "safeTransferFrom",
+			"name": "safeBatchTransferFrom",
 			"outputs": [],
 			"stateMutability": "nonpayable",
 			"type": "function"
@@ -220,7 +126,12 @@ exports.handler = async (event) => {
 				},
 				{
 					"internalType": "uint256",
-					"name": "tokenId",
+					"name": "id",
+					"type": "uint256"
+				},
+				{
+					"internalType": "uint256",
+					"name": "amount",
 					"type": "uint256"
 				},
 				{
@@ -255,17 +166,17 @@ exports.handler = async (event) => {
 		{
 			"inputs": [
 				{
-					"internalType": "string",
-					"name": "yearMonthDate",
-					"type": "string"
+					"internalType": "uint256",
+					"name": "tokenId",
+					"type": "uint256"
 				},
 				{
-					"internalType": "string[]",
-					"name": "tokenURIs",
-					"type": "string[]"
+					"internalType": "string",
+					"name": "metadataPart",
+					"type": "string"
 				}
 			],
-			"name": "setTokenURIs",
+			"name": "setURI",
 			"outputs": [],
 			"stateMutability": "nonpayable",
 			"type": "function"
@@ -276,6 +187,12 @@ exports.handler = async (event) => {
 				{
 					"indexed": true,
 					"internalType": "address",
+					"name": "operator",
+					"type": "address"
+				},
+				{
+					"indexed": true,
+					"internalType": "address",
 					"name": "from",
 					"type": "address"
 				},
@@ -286,37 +203,20 @@ exports.handler = async (event) => {
 					"type": "address"
 				},
 				{
-					"indexed": true,
-					"internalType": "uint256",
-					"name": "tokenId",
-					"type": "uint256"
+					"indexed": false,
+					"internalType": "uint256[]",
+					"name": "ids",
+					"type": "uint256[]"
+				},
+				{
+					"indexed": false,
+					"internalType": "uint256[]",
+					"name": "values",
+					"type": "uint256[]"
 				}
 			],
-			"name": "Transfer",
+			"name": "TransferBatch",
 			"type": "event"
-		},
-		{
-			"inputs": [
-				{
-					"internalType": "address",
-					"name": "from",
-					"type": "address"
-				},
-				{
-					"internalType": "address",
-					"name": "to",
-					"type": "address"
-				},
-				{
-					"internalType": "uint256",
-					"name": "tokenId",
-					"type": "uint256"
-				}
-			],
-			"name": "transferFrom",
-			"outputs": [],
-			"stateMutability": "nonpayable",
-			"type": "function"
 		},
 		{
 			"inputs": [
@@ -332,11 +232,72 @@ exports.handler = async (event) => {
 			"type": "function"
 		},
 		{
+			"anonymous": false,
+			"inputs": [
+				{
+					"indexed": true,
+					"internalType": "address",
+					"name": "operator",
+					"type": "address"
+				},
+				{
+					"indexed": true,
+					"internalType": "address",
+					"name": "from",
+					"type": "address"
+				},
+				{
+					"indexed": true,
+					"internalType": "address",
+					"name": "to",
+					"type": "address"
+				},
+				{
+					"indexed": false,
+					"internalType": "uint256",
+					"name": "id",
+					"type": "uint256"
+				},
+				{
+					"indexed": false,
+					"internalType": "uint256",
+					"name": "value",
+					"type": "uint256"
+				}
+			],
+			"name": "TransferSingle",
+			"type": "event"
+		},
+		{
+			"anonymous": false,
+			"inputs": [
+				{
+					"indexed": false,
+					"internalType": "string",
+					"name": "value",
+					"type": "string"
+				},
+				{
+					"indexed": true,
+					"internalType": "uint256",
+					"name": "id",
+					"type": "uint256"
+				}
+			],
+			"name": "URI",
+			"type": "event"
+		},
+		{
 			"inputs": [
 				{
 					"internalType": "address",
-					"name": "owner",
+					"name": "account",
 					"type": "address"
+				},
+				{
+					"internalType": "uint256",
+					"name": "id",
+					"type": "uint256"
 				}
 			],
 			"name": "balanceOf",
@@ -351,32 +312,24 @@ exports.handler = async (event) => {
 			"type": "function"
 		},
 		{
-			"inputs": [],
-			"name": "deployer",
-			"outputs": [
-				{
-					"internalType": "address payable",
-					"name": "",
-					"type": "address"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
 			"inputs": [
 				{
-					"internalType": "uint256",
-					"name": "tokenId",
-					"type": "uint256"
+					"internalType": "address[]",
+					"name": "accounts",
+					"type": "address[]"
+				},
+				{
+					"internalType": "uint256[]",
+					"name": "ids",
+					"type": "uint256[]"
 				}
 			],
-			"name": "getApproved",
+			"name": "balanceOfBatch",
 			"outputs": [
 				{
-					"internalType": "address",
+					"internalType": "uint256[]",
 					"name": "",
-					"type": "address"
+					"type": "uint256[]"
 				}
 			],
 			"stateMutability": "view",
@@ -386,7 +339,7 @@ exports.handler = async (event) => {
 			"inputs": [
 				{
 					"internalType": "address",
-					"name": "owner",
+					"name": "account",
 					"type": "address"
 				},
 				{
@@ -408,52 +361,7 @@ exports.handler = async (event) => {
 		},
 		{
 			"inputs": [],
-			"name": "MINT_PRICE",
-			"outputs": [
-				{
-					"internalType": "uint256",
-					"name": "",
-					"type": "uint256"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [],
-			"name": "name",
-			"outputs": [
-				{
-					"internalType": "string",
-					"name": "",
-					"type": "string"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [],
 			"name": "owner",
-			"outputs": [
-				{
-					"internalType": "address",
-					"name": "",
-					"type": "address"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [
-				{
-					"internalType": "uint256",
-					"name": "tokenId",
-					"type": "uint256"
-				}
-			],
-			"name": "ownerOf",
 			"outputs": [
 				{
 					"internalType": "address",
@@ -484,19 +392,6 @@ exports.handler = async (event) => {
 			"type": "function"
 		},
 		{
-			"inputs": [],
-			"name": "symbol",
-			"outputs": [
-				{
-					"internalType": "string",
-					"name": "",
-					"type": "string"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
 			"inputs": [
 				{
 					"internalType": "uint256",
@@ -504,7 +399,7 @@ exports.handler = async (event) => {
 					"type": "uint256"
 				}
 			],
-			"name": "tokenURI",
+			"name": "uri",
 			"outputs": [
 				{
 					"internalType": "string",
@@ -515,36 +410,36 @@ exports.handler = async (event) => {
 			"stateMutability": "view",
 			"type": "function"
 		}
-	];
-    const contract = new web3.eth.Contract(abi, contractAddress);
+];
+const PRIVATE_KEY = process.env.PRIVATE_KEY;
+const PUBLIC_KEY = process.env.PUBLIC_KEY;
+const ENDPOINT = process.env.ENDPOINT;
 
-    const account = web3.eth.accounts.privateKeyToAccount(privateKey);
-    web3.eth.accounts.wallet.add(account);
+const web3 = new Web3(ENDPOINT);
 
-	try {
-        // エンコードされた関数呼び出しを作成
-        const data = contract.methods.setTokenURIs(yearMonthDate, tokenURIs).encodeABI();
+const handler = async (event) => {
+    const contract = new web3.eth.Contract(CONTRACT_ABI, CONTRACT_ADDRESS);
 
-        // トランザクションパラメータを設定
-        const txParams = {
-            to: contractAddress,
-            data: data,
-            gasLimit: web3.utils.toHex(50000), // 十分なガスリミットを設定
-            from: account.address
-        };
+    const tokenId = event.tokenId;
+    const newUri = event.newUri;
 
-        // トランザクションを送信
-        web3.eth.sendTransaction(txParams)
-            .on('receipt', (receipt) => {
-                console.log("Transaction successful: ", receipt);
-                return { statusCode: 200, body: JSON.stringify('Function executed successfully!') };
-            })
-            .on('error', (error) => {
-                console.error("Error executing transaction: ", error);
-                return { statusCode: 500, body: JSON.stringify('Error executing function') };
-            });
+    const data = contract.methods.setURI(tokenId, newUri).encodeABI();
+
+    const tx = {
+        from: PUBLIC_KEY,
+        to: CONTRACT_ADDRESS,
+        gas: 200000,
+        data: data
+    };
+
+    const signedTx = await web3.eth.accounts.signTransaction(tx, PRIVATE_KEY);
+    
+    try {
+        const receipt = await web3.eth.sendSignedTransaction(signedTx.rawTransaction);
+        console.log('Transaction receipt:', receipt);
     } catch (error) {
-        console.error("Error: ", error);
-        return { statusCode: 500, body: JSON.stringify('Error executing function') };
+        console.error('Error sending transaction:', error);
     }
 };
+
+exports.handler = handler;
