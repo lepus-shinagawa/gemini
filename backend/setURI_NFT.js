@@ -1,10 +1,15 @@
-const dotenv = require('dotenv');
 const Web3 = require('web3');
 
-dotenv.config();
+exports.handler = async (event) => {
+    const contractAddress = process.env.CONTRACT_ADDRESS;
+    const privateKey = process.env.PRIVATE_KEY;
+    const providerUrl = process.env.ASTAR_RPC_URL;
 
-const CONTRACT_ADDRESS = '0x9b3C966db9D8726b397e06D870F8dD3a512A1dc4';
-const CONTRACT_ABI = [
+    const yearMonthDate = event.yearMonthDate;
+    const tokenURIs = event.tokenURIs;
+
+    const web3 = new Web3(providerUrl);
+	const abi = [
 		{
 			"inputs": [],
 			"stateMutability": "nonpayable",
@@ -16,7 +21,32 @@ const CONTRACT_ABI = [
 				{
 					"indexed": true,
 					"internalType": "address",
-					"name": "account",
+					"name": "owner",
+					"type": "address"
+				},
+				{
+					"indexed": true,
+					"internalType": "address",
+					"name": "approved",
+					"type": "address"
+				},
+				{
+					"indexed": true,
+					"internalType": "uint256",
+					"name": "tokenId",
+					"type": "uint256"
+				}
+			],
+			"name": "Approval",
+			"type": "event"
+		},
+		{
+			"anonymous": false,
+			"inputs": [
+				{
+					"indexed": true,
+					"internalType": "address",
+					"name": "owner",
 					"type": "address"
 				},
 				{
@@ -39,7 +69,7 @@ const CONTRACT_ABI = [
 			"inputs": [
 				{
 					"internalType": "address",
-					"name": "account",
+					"name": "to",
 					"type": "address"
 				},
 				{
@@ -48,10 +78,42 @@ const CONTRACT_ABI = [
 					"type": "uint256"
 				}
 			],
-			"name": "mint",
+			"name": "approve",
 			"outputs": [],
 			"stateMutability": "nonpayable",
 			"type": "function"
+		},
+		{
+			"anonymous": false,
+			"inputs": [
+				{
+					"indexed": false,
+					"internalType": "uint256",
+					"name": "_fromTokenId",
+					"type": "uint256"
+				},
+				{
+					"indexed": false,
+					"internalType": "uint256",
+					"name": "_toTokenId",
+					"type": "uint256"
+				}
+			],
+			"name": "BatchMetadataUpdate",
+			"type": "event"
+		},
+		{
+			"anonymous": false,
+			"inputs": [
+				{
+					"indexed": false,
+					"internalType": "uint256",
+					"name": "_tokenId",
+					"type": "uint256"
+				}
+			],
+			"name": "MetadataUpdate",
+			"type": "event"
 		},
 		{
 			"anonymous": false,
@@ -83,31 +145,21 @@ const CONTRACT_ABI = [
 			"inputs": [
 				{
 					"internalType": "address",
-					"name": "from",
-					"type": "address"
-				},
-				{
-					"internalType": "address",
 					"name": "to",
 					"type": "address"
 				},
 				{
-					"internalType": "uint256[]",
-					"name": "ids",
-					"type": "uint256[]"
+					"internalType": "string",
+					"name": "yearMonthDate",
+					"type": "string"
 				},
 				{
-					"internalType": "uint256[]",
-					"name": "amounts",
-					"type": "uint256[]"
-				},
-				{
-					"internalType": "bytes",
-					"name": "data",
-					"type": "bytes"
+					"internalType": "uint256",
+					"name": "starSignIndex",
+					"type": "uint256"
 				}
 			],
-			"name": "safeBatchTransferFrom",
+			"name": "safeMint",
 			"outputs": [],
 			"stateMutability": "nonpayable",
 			"type": "function"
@@ -126,12 +178,30 @@ const CONTRACT_ABI = [
 				},
 				{
 					"internalType": "uint256",
-					"name": "id",
+					"name": "tokenId",
 					"type": "uint256"
+				}
+			],
+			"name": "safeTransferFrom",
+			"outputs": [],
+			"stateMutability": "nonpayable",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "address",
+					"name": "from",
+					"type": "address"
+				},
+				{
+					"internalType": "address",
+					"name": "to",
+					"type": "address"
 				},
 				{
 					"internalType": "uint256",
-					"name": "amount",
+					"name": "tokenId",
 					"type": "uint256"
 				},
 				{
@@ -166,17 +236,17 @@ const CONTRACT_ABI = [
 		{
 			"inputs": [
 				{
-					"internalType": "uint256",
-					"name": "tokenId",
-					"type": "uint256"
+					"internalType": "string",
+					"name": "yearMonthDate",
+					"type": "string"
 				},
 				{
-					"internalType": "string",
-					"name": "metadataPart",
-					"type": "string"
+					"internalType": "string[]",
+					"name": "tokenURIs",
+					"type": "string[]"
 				}
 			],
-			"name": "setURI",
+			"name": "setTokenURIs",
 			"outputs": [],
 			"stateMutability": "nonpayable",
 			"type": "function"
@@ -184,12 +254,6 @@ const CONTRACT_ABI = [
 		{
 			"anonymous": false,
 			"inputs": [
-				{
-					"indexed": true,
-					"internalType": "address",
-					"name": "operator",
-					"type": "address"
-				},
 				{
 					"indexed": true,
 					"internalType": "address",
@@ -203,20 +267,37 @@ const CONTRACT_ABI = [
 					"type": "address"
 				},
 				{
-					"indexed": false,
-					"internalType": "uint256[]",
-					"name": "ids",
-					"type": "uint256[]"
-				},
-				{
-					"indexed": false,
-					"internalType": "uint256[]",
-					"name": "values",
-					"type": "uint256[]"
+					"indexed": true,
+					"internalType": "uint256",
+					"name": "tokenId",
+					"type": "uint256"
 				}
 			],
-			"name": "TransferBatch",
+			"name": "Transfer",
 			"type": "event"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "address",
+					"name": "from",
+					"type": "address"
+				},
+				{
+					"internalType": "address",
+					"name": "to",
+					"type": "address"
+				},
+				{
+					"internalType": "uint256",
+					"name": "tokenId",
+					"type": "uint256"
+				}
+			],
+			"name": "transferFrom",
+			"outputs": [],
+			"stateMutability": "nonpayable",
+			"type": "function"
 		},
 		{
 			"inputs": [
@@ -232,72 +313,11 @@ const CONTRACT_ABI = [
 			"type": "function"
 		},
 		{
-			"anonymous": false,
-			"inputs": [
-				{
-					"indexed": true,
-					"internalType": "address",
-					"name": "operator",
-					"type": "address"
-				},
-				{
-					"indexed": true,
-					"internalType": "address",
-					"name": "from",
-					"type": "address"
-				},
-				{
-					"indexed": true,
-					"internalType": "address",
-					"name": "to",
-					"type": "address"
-				},
-				{
-					"indexed": false,
-					"internalType": "uint256",
-					"name": "id",
-					"type": "uint256"
-				},
-				{
-					"indexed": false,
-					"internalType": "uint256",
-					"name": "value",
-					"type": "uint256"
-				}
-			],
-			"name": "TransferSingle",
-			"type": "event"
-		},
-		{
-			"anonymous": false,
-			"inputs": [
-				{
-					"indexed": false,
-					"internalType": "string",
-					"name": "value",
-					"type": "string"
-				},
-				{
-					"indexed": true,
-					"internalType": "uint256",
-					"name": "id",
-					"type": "uint256"
-				}
-			],
-			"name": "URI",
-			"type": "event"
-		},
-		{
 			"inputs": [
 				{
 					"internalType": "address",
-					"name": "account",
+					"name": "owner",
 					"type": "address"
-				},
-				{
-					"internalType": "uint256",
-					"name": "id",
-					"type": "uint256"
 				}
 			],
 			"name": "balanceOf",
@@ -314,22 +334,17 @@ const CONTRACT_ABI = [
 		{
 			"inputs": [
 				{
-					"internalType": "address[]",
-					"name": "accounts",
-					"type": "address[]"
-				},
-				{
-					"internalType": "uint256[]",
-					"name": "ids",
-					"type": "uint256[]"
+					"internalType": "uint256",
+					"name": "tokenId",
+					"type": "uint256"
 				}
 			],
-			"name": "balanceOfBatch",
+			"name": "getApproved",
 			"outputs": [
 				{
-					"internalType": "uint256[]",
+					"internalType": "address",
 					"name": "",
-					"type": "uint256[]"
+					"type": "address"
 				}
 			],
 			"stateMutability": "view",
@@ -339,7 +354,7 @@ const CONTRACT_ABI = [
 			"inputs": [
 				{
 					"internalType": "address",
-					"name": "account",
+					"name": "owner",
 					"type": "address"
 				},
 				{
@@ -361,7 +376,39 @@ const CONTRACT_ABI = [
 		},
 		{
 			"inputs": [],
+			"name": "name",
+			"outputs": [
+				{
+					"internalType": "string",
+					"name": "",
+					"type": "string"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
 			"name": "owner",
+			"outputs": [
+				{
+					"internalType": "address",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "uint256",
+					"name": "tokenId",
+					"type": "uint256"
+				}
+			],
+			"name": "ownerOf",
 			"outputs": [
 				{
 					"internalType": "address",
@@ -392,6 +439,19 @@ const CONTRACT_ABI = [
 			"type": "function"
 		},
 		{
+			"inputs": [],
+			"name": "symbol",
+			"outputs": [
+				{
+					"internalType": "string",
+					"name": "",
+					"type": "string"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
 			"inputs": [
 				{
 					"internalType": "uint256",
@@ -399,7 +459,7 @@ const CONTRACT_ABI = [
 					"type": "uint256"
 				}
 			],
-			"name": "uri",
+			"name": "tokenURI",
 			"outputs": [
 				{
 					"internalType": "string",
@@ -410,36 +470,33 @@ const CONTRACT_ABI = [
 			"stateMutability": "view",
 			"type": "function"
 		}
-];
-const PRIVATE_KEY = process.env.PRIVATE_KEY;
-const PUBLIC_KEY = process.env.PUBLIC_KEY;
-const ENDPOINT = process.env.ENDPOINT;
+	];
+    const contract = new web3.eth.Contract(abi, contractAddress);
 
-const web3 = new Web3(ENDPOINT);
+    const account = web3.eth.accounts.privateKeyToAccount(privateKey);
+    web3.eth.accounts.wallet.add(account);
 
-const handler = async (event) => {
-    const contract = new web3.eth.Contract(CONTRACT_ABI, CONTRACT_ADDRESS);
+	try {
+        const data = contract.methods.setTokenURIs(yearMonthDate, tokenURIs).encodeABI();
 
-    const tokenId = event.tokenId;
-    const newUri = event.newUri;
+        const txParams = {
+            to: contractAddress,
+            data: data,
+            gasLimit: web3.utils.toHex(5000000),
+            from: account.address,
+			chainId: 592
+        };
 
-    const data = contract.methods.setURI(tokenId, newUri).encodeABI();
+        const receipt = await new Promise((resolve, reject) => {
+            web3.eth.sendTransaction(txParams)
+                .on('receipt', resolve)
+                .on('error', reject);
+        });
 
-    const tx = {
-        from: PUBLIC_KEY,
-        to: CONTRACT_ADDRESS,
-        gas: 200000,
-        data: data
-    };
-
-    const signedTx = await web3.eth.accounts.signTransaction(tx, PRIVATE_KEY);
-    
-    try {
-        const receipt = await web3.eth.sendSignedTransaction(signedTx.rawTransaction);
-        console.log('Transaction receipt:', receipt);
+        console.log("Transaction successful: ", receipt);
+        return { statusCode: 200, body: JSON.stringify('Function executed successfully!') };
     } catch (error) {
-        console.error('Error sending transaction:', error);
+        console.error("Error: ", error);
+        return { statusCode: 500, body: JSON.stringify('Error executing function') };
     }
 };
-
-exports.handler = handler;

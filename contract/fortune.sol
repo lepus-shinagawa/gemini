@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: a
+// SPDX-License-Identifier: MIT
 
 pragma solidity ^0.8.19;
 
@@ -8,7 +8,7 @@ import "@openzeppelin/contracts@4.9.2/access/Ownable.sol";
 import "@openzeppelin/contracts@4.9.2/utils/Counters.sol";
 
 
-contract Gemini is ERC721, ERC721URIStorage, Ownable {
+contract fortune is ERC721, ERC721URIStorage, Ownable {
     using Counters for Counters.Counter;
 
     Counters.Counter private _tokenIdCounter;
