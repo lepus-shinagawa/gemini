@@ -25,7 +25,7 @@ export class GeminiContract {
         const web3 = new Web3(provider as HttpProvider);
         return new web3.eth.Contract(
             GeminiABI as AbiItem[],
-            "0x9A024fE63240A665199339b4F540c6cDc7ed7759");
+            "0x077F00867aC05D666ac28F14cfaD74DE67E8BA53");
     }
 
     public async getTokenURI(tokenId: number){
@@ -52,7 +52,7 @@ export class GeminiContract {
             .request({ method: 'eth_chainId' });
         if (chainId !== "0x250")
         {
-            throw new Error("Astar networkに切り替えてください")
+            throw new Error("Oasys networkに切り替えてください")
         }
 
         const contract = await this.getContract();
